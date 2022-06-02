@@ -42,7 +42,7 @@ svg.append('g')
     .attr('class', 'x axis')
     .attr('transform', 'translate(0,' + height + ')');
 
-yAxis = svg.append('g')
+svg.append('g')
     .attr('class', 'y axis');
 
 svg.append("g")
@@ -106,13 +106,17 @@ function draw(year) {
 }
 data = {}
 async function get() {
-    requestUrl = 'https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf&limit=100';
+    requestUrl = 'https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf';
     let datastorez = await (await fetch(requestUrl)).json();
     return datastorez.result['records'];
 }
 (async () => {
     result = await get()
     const unique = [...new Set(result.map(item => item.year))];
+    var minYear = Math.min.apply(null,unique);
+    var maxYear = Math.max.apply(null,unique);
+    d3.select('#year').attr('min',minYear).attr('max',maxYear);
+    console.log(unique)
 
     for (year in unique) {
         y1 = unique[year];
@@ -129,9 +133,5 @@ async function get() {
         draw(this.value)
     });
 })()
-
-// var data = []
-// data = fetch(requestUrl).json();
-// console.log(data)
 
 
