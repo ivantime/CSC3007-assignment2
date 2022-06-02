@@ -16,16 +16,33 @@
     </style>
 </head>
 
+<style>
+    .tooltip {
+        position: absolute;
+        opacity: 0;
+        visibility: hidden;
+        width: 300 px;
+        height: 200 px;
+        padding: 2 px;
+        font: 12 px sans - serif;
+        background: red;
+        border: 0 px;
+        border-radius: 8 px;
+        z-index: 50;
+        pointer-events: none;
+    }
+</style>
+
 <body>
     <form>
         <label for="year">Please select a year: </label>
         <input type="range" min=2009 max=2014 step=1 id="year" value=2014>
         <output name="slider_selected_year" id="slider_selected_year">2014</output>
         <script>
-            
+
             //on change year via slider (update the following)
             year.addEventListener("input", function (e) {
-                slider_selected_year.value=this.value;
+                slider_selected_year.value = this.value;
             });
         </script>
     </form>

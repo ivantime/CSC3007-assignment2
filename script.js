@@ -27,6 +27,8 @@ var x_scale = d3.scaleBand()
 
 var y_scale = d3.scaleLinear()
     .range([height, 0]);
+var yback_scale = d3.scaleLinear()
+    .range([0, height]);
 
 let colorScale = d3.scaleLinear()
     .domain([0, 1000])
@@ -45,8 +47,16 @@ svg.append('g')
 svg.append('g')
     .attr('class', 'y axis');
 
-svg.append("g")
-    .attr("class", "y axis")
+// var tooltip = d3.select("body")
+//     .append("div")
+//     .style("position", "absolute")
+//     .style("visibility", "hidden")
+//     .style("background-color", "white")
+//     .style("border", "solid")
+//     .style("border-width", "1px")
+//     .style("border-radius", "5px")
+//     .style("padding", "10px")
+//     .html("<p>I'm a tooltip written in HTML</p><img src='https://github.com/holtzy/D3-graph-gallery/blob/master/img/section/ArcSmal.png?raw=true'></img><br>Fancy<br><span style='font-size: 40px;'>Isn't it?</span>");
 
 function draw(year) {
     var temp_data = data[year]
@@ -84,6 +94,10 @@ function draw(year) {
         .attr('y', height)
         .attr('height', 0)
 
+    // function getSum(total, num) {
+    //     return total + Math.round(num.value);
+    // }
+
     new_bars.merge(bars)
         .transition(t)
         .attr('y', function (d) {
@@ -94,7 +108,57 @@ function draw(year) {
         })
         .attr('fill', function (d) {
             return colour_scale(+d.value);
+        });
+        
+    new_bars.select(".rect")
+        .data(temp_data)
+        .enter()
+        .append("text")
+        .transition(t)
+        .attr("class", "text")
+        .attr("text-anchor", "middle")
+        .attr("x", function (d) { return x_scale(d.level_2) + (x_scale.bandwidth() / 2) })
+        .attr("y", function (d) { return y_scale(+d.value) - 5 })
+        .attr('height', 10)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr('width', x_scale.bandwidth())
+        .attr("fill", "black")
+        .text(function (d) { return d.value })
+    
+    barsAgain = new_bars
+        .on('mouseover', function (d, i) {
+            //add transition effect for bar
+            d3.select(this).transition()
+
+                //add opacity for bar
+                .duration('50')
+                .attr('opacity', '.85')
+
+                //add outline for bar
+                .attr("stroke", "black")
+                .attr("stroke-width", 2);
+
         })
+        .on('mousemove', function (d, i) { console.log(d.clientX); tooltip.style("top", (d.clientY + 800) + "px").style("left", (d.clientX + 800) + "px");})
+        .on('mouseout', function (d, i) {
+            //add transition effect for bar
+            d3.select(this).transition()
+
+                //add opacity for bar
+                .duration('50')
+                .attr('opacity', '1')
+
+                //remove outline for bar
+                .attr("stroke", "none");
+
+        })
+
+    barsAgain
+        .exit()
+        .remove();
+
+    console.log("success")
 
     svg.select('.x.axis')
         .call(x_axis);
@@ -113,10 +177,9 @@ async function get() {
 (async () => {
     result = await get()
     const unique = [...new Set(result.map(item => item.year))];
-    var minYear = Math.min.apply(null,unique);
-    var maxYear = Math.max.apply(null,unique);
-    d3.select('#year').attr('min',minYear).attr('max',maxYear);
-    console.log(unique)
+    var minYear = Math.min.apply(null, unique);
+    var maxYear = Math.max.apply(null, unique);
+    d3.select('#year').attr('min', minYear).attr('max', maxYear);
 
     for (year in unique) {
         y1 = unique[year];
