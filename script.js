@@ -1,3 +1,5 @@
+d3.select("#year").property("value", 2011)
+
 var width = document.getElementById('visualizeThisChart')
     .clientWidth;
 var height = document.getElementById('visualizeThisChart')
@@ -47,22 +49,8 @@ svg.append('g')
 svg.append('g')
     .attr('class', 'y axis');
 
-// var tooltip = d3.select("body")
-//     .append("div")
-//     .style("position", "absolute")
-//     .style("visibility", "hidden")
-//     .style("background-color", "white")
-//     .style("border", "solid")
-//     .style("border-width", "1px")
-//     .style("border-radius", "5px")
-//     .style("padding", "10px")
-//     .html("<p>I'm a tooltip written in HTML</p><img src='https://github.com/holtzy/D3-graph-gallery/blob/master/img/section/ArcSmal.png?raw=true'></img><br>Fancy<br><span style='font-size: 40px;'>Isn't it?</span>");
-
 function draw(year) {
     var temp_data = data[year]
-
-    var t = d3.transition()
-        .duration(500);
 
     var type = temp_data.map(function (d) {
         return d.level_2;
@@ -79,10 +67,6 @@ function draw(year) {
     var bars = svg.selectAll('.bar')
         .data(temp_data)
 
-    bars
-        .exit()
-        .remove();
-
     var new_bars = bars
         .enter()
         .append('rect')
@@ -93,41 +77,34 @@ function draw(year) {
         .attr('width', x_scale.bandwidth())
         .attr('y', height)
         .attr('height', 0)
-
-    // function getSum(total, num) {
-    //     return total + Math.round(num.value);
-    // }
+        
 
     new_bars.merge(bars)
-        .transition(t)
+        .transition().duration(500)
         .attr('y', function (d) {
-            return y_scale(+d.value);
+            return y_scale(d.value);
         })
         .attr('height', function (d) {
-            return height - y_scale(+d.value)
+            return height - y_scale(d.value)
         })
         .attr('fill', function (d) {
-            return colour_scale(+d.value);
+            return colour_scale(d.value);
         });
-        
-    new_bars.select(".rect")
-        .data(temp_data)
-        .enter()
-        .append("text")
-        .transition(t)
-        .attr("class", "text")
-        .attr("text-anchor", "middle")
-        .attr("x", function (d) { return x_scale(d.level_2) + (x_scale.bandwidth() / 2) })
-        .attr("y", function (d) { return y_scale(+d.value) - 5 })
-        .attr('height', 10)
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "11px")
-        .attr('width', x_scale.bandwidth())
-        .attr("fill", "black")
-        .text(function (d) { return d.value })
-    
-    barsAgain = new_bars
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style('position', 'absolute')
+        .style('z-index', '10')
+        .style('padding', '10px')
+        .style('background', 'rgba(0,0,0,0.6)')
+        .style('border-radius', '4px')
+        .style('color', '#fff');
+
+    new_bars
+        .data(new_bars.data())
         .on('mouseover', function (d, i) {
+
             //add transition effect for bar
             d3.select(this).transition()
 
@@ -139,10 +116,33 @@ function draw(year) {
                 .attr("stroke", "black")
                 .attr("stroke-width", 2);
 
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+
+            function totalSum(total) {
+                var totalSum = 0;
+                total.forEach(function (d) { totalSum = totalSum + parseInt(d.value) })
+                return totalSum;
+            }
+
+            function percent(curr, total) {
+                var per = (parseFloat(curr / totalSum(total)) * 100).toFixed(2);
+                return per;
+            }
+
+
+            div.html("Cases: " + i.value +
+                " <br>(<u><b>" + percent(i.value, new_bars.data()) + "%</b></u> of " + i.year + ")<br>")
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
         })
-        .on('mousemove', function (d, i) { console.log(d.clientX); tooltip.style("top", (d.clientY + 800) + "px").style("left", (d.clientX + 800) + "px");})
-        .on('mouseout', function (d, i) {
-            //add transition effect for bar
+        .on('mousemove', function (d, i) {
+            div
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
             d3.select(this).transition()
 
                 //add opacity for bar
@@ -152,11 +152,12 @@ function draw(year) {
                 //remove outline for bar
                 .attr("stroke", "none");
 
-        })
 
-    barsAgain
-        .exit()
-        .remove();
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
 
     console.log("success")
 
@@ -164,7 +165,7 @@ function draw(year) {
         .call(x_axis);
 
     svg.select('.y.axis')
-        .transition(t)
+        .transition().duration(500)
         .call(y_axis);
 
 }

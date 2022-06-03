@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<style>
+    div.tooltip {
+        position: absolute;
+        visibility: visible;
+        background: red;
+        z-index: 50;
+        pointer-events: none;
+    }
+</style>
+
 <head>
     <meta charset="UTF-8">
     <title>Assignment 2</title>
+    <script type="text/javascript"></script>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3-queue/3.0.4/d3-queue.min.js"></script>
     <style>
@@ -16,28 +27,12 @@
     </style>
 </head>
 
-<style>
-    .tooltip {
-        position: absolute;
-        opacity: 0;
-        visibility: hidden;
-        width: 300 px;
-        height: 200 px;
-        padding: 2 px;
-        font: 12 px sans - serif;
-        background: red;
-        border: 0 px;
-        border-radius: 8 px;
-        z-index: 50;
-        pointer-events: none;
-    }
-</style>
-
 <body>
+
     <form>
         <label for="year">Please select a year: </label>
-        <input type="range" min=2009 max=2014 step=1 id="year" value=2014>
-        <output name="slider_selected_year" id="slider_selected_year">2014</output>
+        <input type="range" min=2011 max=2020 step=1 id="year" value=2011>
+        <output name="slider_selected_year" id="slider_selected_year">2011</output>
         <script>
 
             //on change year via slider (update the following)
