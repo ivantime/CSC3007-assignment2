@@ -49,9 +49,9 @@ svg.append('g')
 svg.append('g')
     .attr('class', 'y axis');
 
+
 function draw(year) {
     var temp_data = data[year]
-
     var type = temp_data.map(function (d) {
         return d.level_2;
     });
@@ -64,47 +64,48 @@ function draw(year) {
     y_scale.domain([0, max_value]);
     colour_scale.domain([0, max_value]);
 
-    var bars = svg.selectAll('.bar')
+    var groups = svg.selectAll("g.barers")
         .data(temp_data)
-
-    var new_bars = bars
         .enter()
-        .append('rect')
-        .attr('class', 'bar')
-        .attr('x', function (d) {
-            return x_scale(d.level_2);
-        })
-        .attr('width', x_scale.bandwidth())
-        .attr('y', height)
-        .attr('height', 0)
-        
+        .append("g")
+        .attr('class', 'barers')
 
-    new_bars.merge(bars)
-        .transition().duration(500)
-        .attr('y', function (d) {
-            return y_scale(d.value);
-        })
-        .attr('height', function (d) {
-            return height - y_scale(d.value)
-        })
-        .attr('fill', function (d) {
-            return colour_scale(d.value);
-        });
 
-    var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0)
-        .style('position', 'absolute')
-        .style('z-index', '10')
-        .style('padding', '10px')
-        .style('background', 'rgba(0,0,0,0.6)')
-        .style('border-radius', '4px')
-        .style('color', '#fff');
+    svg.selectAll("g.barers")
+        .each(function (d, i) {
+            d3.select(this)
+                .append("rect")
+                .attr('class', 'bar')
+                .attr('x', x_scale(d.level_2))
+                .attr('width', x_scale.bandwidth())
+                .attr('y', height)
+                .attr('height', 0)
+                .transition().duration(500)
+                .attr('y', y_scale(d.value))
+                .attr('height', height - y_scale(d.value))
+                .attr('x', x_scale(d.level_2))
+                .attr('width', x_scale.bandwidth())
+                .attr('fill', colour_scale(d.value))
 
-    new_bars
-        .data(new_bars.data())
+
+            d3.select(this)
+                .append("rect")
+                .attr('class', 'extraBar')
+                .style("opacity", "0")
+                .attr('x', x_scale(d.level_2))
+                .attr('width', x_scale.bandwidth())
+                .attr('y', height)
+                .attr('height', 0)
+                .transition().duration(500)
+                .attr('x', x_scale(d.level_2))
+                .attr('y', y_scale(d.value)-15)
+                .attr('height', height - y_scale(d.value)+15)
+                .attr('width', x_scale.bandwidth())
+        })
+
+    svg.selectAll(".extraBar")
         .on('mouseover', function (d, i) {
-
+            console.log(d3.select(this))
             //add transition effect for bar
             d3.select(this).transition()
 
@@ -131,9 +132,8 @@ function draw(year) {
                 return per;
             }
 
-
             div.html("Cases: " + i.value +
-                " <br>(<u><b>" + percent(i.value, new_bars.data()) + "%</b></u> of " + i.year + ")<br>")
+                " <br>(<u><b>" + percent(i.value, temp_data) + "%</b></u> of " + i.year + ")<br>")
                 .style("left", (event.pageX) + "px")
                 .style("top", (event.pageY - 28) + "px");
         })
@@ -157,6 +157,17 @@ function draw(year) {
                 .duration(500)
                 .style("opacity", 0);
         });
+
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style('position', 'absolute')
+        .style('z-index', '10')
+        .style('padding', '10px')
+        .style('background', 'rgba(0,0,0,0.6)')
+        .style('border-radius', '4px')
+        .style('color', '#fff');
 
 
     console.log("success")
@@ -194,6 +205,8 @@ async function get() {
 
     var slider = d3.select('#year');
     slider.on('change', function () {
+        d3.selectAll('.extraBar').remove();
+        d3.selectAll('.bar').remove();
         draw(this.value)
     });
 })()
