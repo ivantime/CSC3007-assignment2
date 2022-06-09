@@ -32,11 +32,11 @@ var yback_scale = d3.scaleLinear()
     .range([0, height]);
 
 let colorScale = d3.scaleLinear()
-    .domain([0, 1000])
-    .range([0, 20]);
+    .domain([0, height])
+    .range([0, 100]);
 
-var colour_scale = d3.scaleQuantile()
-    .range(["#FA985C", "#8291DB", "#CBF24B", "#DB3941", "#42E7FF", "#5C93FA", "#DB958B", "#CBF24B", "#397FDB"]);
+// var colour_scale = d3.scaleQuantile()
+// .range(["#FA985C", "#8291DB", "#CBF24B", "#DB3941", "#42E7FF", "#5C93FA", "#DB958B", "#CBF24B", "#397FDB"]);
 
 var y_axis = d3.axisLeft(y_scale);
 var x_axis = d3.axisBottom(x_scale);
@@ -60,7 +60,7 @@ function drawOne(year) {
     });
 
     y_scale.domain([0, max_value]);
-    colour_scale.domain([0, max_value]);
+    // colour_scale.domain([0, max_value]);
 
     var groups = svg.selectAll("g.barers")
         .data(temp_data)
@@ -83,7 +83,10 @@ function drawOne(year) {
                 .attr('height', height - y_scale(d.value))
                 .attr('x', x_scale(d.level_2))
                 .attr('width', x_scale.bandwidth())
-                .attr('fill', colour_scale(d.value))
+                // .attr('fill', colour_scale(d.value))
+
+                //Add Color scale according to radius size
+                .attr("fill", d => d3.interpolateViridis(colorScale(d.value)))
 
 
             d3.select(this)
@@ -196,7 +199,7 @@ function drawTwo(level) {
     });
 
     y_scale.domain([0, max_value]);
-    colour_scale.domain([0, max_value]);
+    // colour_scale.domain([0, max_value]);
 
     var groups = svg.selectAll("g.barers")
         .data(temp_data)
@@ -219,7 +222,10 @@ function drawTwo(level) {
                 .attr('height', height - y_scale(d.value))
                 .attr('x', x_scale(d.year))
                 .attr('width', x_scale.bandwidth())
-                .attr('fill', colour_scale(d.value))
+                // .attr('fill', colour_scale(d.value))
+
+                //Add Color scale according to radius size
+                .attr("fill", d => d3.interpolateViridis(colorScale(d.value)))
 
 
             d3.select(this)
